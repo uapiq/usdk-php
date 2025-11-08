@@ -1,4 +1,4 @@
 configured_endpoints: 2
 openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/voicecraft-b-v-dash%2Fusdk-42291fca4622a145e40ecc943718e11ca3f6fedfe8751d13c30875e0d5988c16.yml
 openapi_spec_hash: 1da4e92f081abcaa0920e19d61551d02
-config_hash: 262c63c8cb5c729c1ad43b94ca1c98eb
+config_hash: cc3b918724084aaf32f3849cb0ea125b
