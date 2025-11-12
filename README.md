@@ -49,7 +49,7 @@ use Usdk\Client;
 
 $client = new Client(apiKey: getenv("UAPI_API_KEY") ?: "My API Key");
 
-$response = $client->search("When is the next solar eclipse?");
+$response = $client->search(["query" => "When is the next solar eclipse?"]);
 
 var_dump($response);
 ```
@@ -71,7 +71,9 @@ When the library is unable to connect to the API, or if the API returns a non-su
 use Usdk\Core\Exceptions\APIConnectionException;
 
 try {
-  $response = $client->extract("https://finance.yahoo.com/quote/NVDA/");
+  $response = $client->extract([
+    "url" => "https://finance.yahoo.com/quote/NVDA/"
+  ]);
 } catch (APIConnectionException $e) {
   echo "The server could not be reached", PHP_EOL;
   var_dump($e->getPrevious());
@@ -118,8 +120,8 @@ $client = new Client(maxRetries: 0);
 
 // Or, configure per-request:
 $result = $client->extract(
-  "https://finance.yahoo.com/quote/NVDA/",
-  requestOptions: RequestOptions::with(maxRetries: 5),
+  ["url" => "https://finance.yahoo.com/quote/NVDA/"],
+  RequestOptions::with(maxRetries: 5),
 );
 ```
 
@@ -139,15 +141,13 @@ Note: the `extra*` parameters of the same name overrides the documented paramete
 use Usdk\RequestOptions;
 
 $response = $client->extract(
-  "https://finance.yahoo.com/quote/NVDA/",
-  requestOptions: RequestOptions::with(
+  ["url" => "https://finance.yahoo.com/quote/NVDA/"],
+  RequestOptions::with(
     extraQueryParams: ["my_query_parameter" => "value"],
     extraBodyParams: ["my_body_parameter" => "value"],
     extraHeaders: ["my-header" => "value"],
   ),
 );
-
-var_dump($response["my_undocumented_property"]);
 ```
 
 #### Undocumented request params

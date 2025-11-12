@@ -6,54 +6,32 @@ namespace Usdk\ServiceContracts;
 
 use Usdk\Core\Exceptions\APIException;
 use Usdk\RequestOptions;
+use Usdk\UsdkExtractParams;
+use Usdk\UsdkSearchParams;
 
 interface UsdkServiceContract
 {
     /**
      * @api
      *
-     * @param string $url
+     * @param array<mixed>|UsdkExtractParams $params
      *
      * @throws APIException
      */
     public function extract(
-        $url,
+        array|UsdkExtractParams $params,
         ?RequestOptions $requestOptions = null
     ): mixed;
 
     /**
      * @api
      *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function extractRaw(
-        array $params,
-        ?RequestOptions $requestOptions = null
-    ): mixed;
-
-    /**
-     * @api
-     *
-     * @param string $query
+     * @param array<mixed>|UsdkSearchParams $params
      *
      * @throws APIException
      */
     public function search(
-        $query,
-        ?RequestOptions $requestOptions = null
-    ): mixed;
-
-    /**
-     * @api
-     *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function searchRaw(
-        array $params,
+        array|UsdkSearchParams $params,
         ?RequestOptions $requestOptions = null
     ): mixed;
 }

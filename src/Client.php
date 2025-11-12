@@ -62,27 +62,15 @@ class Client extends BaseClient
      *
      * Extract Get
      *
-     * @param string $url
+     * @param array{url: string}|UsdkExtractParams $params
      *
      * @throws APIException
      */
-    public function extract($url, ?RequestOptions $requestOptions = null): mixed
-    {
-        return $this->_usdkService->extract($url, $requestOptions);
-    }
-
-    /**
-     * @api
-     *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function extractRaw(
-        array $params,
+    public function extract(
+        array|UsdkExtractParams $params,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->_usdkService->extractRaw($params, $requestOptions);
+        return $this->_usdkService->extract($params, $requestOptions);
     }
 
     /**
@@ -90,32 +78,18 @@ class Client extends BaseClient
      *
      * Search Get
      *
-     * @param string $query
+     * @param array{query: string}|UsdkSearchParams $params
      *
      * @throws APIException
      */
     public function search(
-        $query,
+        array|UsdkSearchParams $params,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->_usdkService->search($query, $requestOptions);
+        return $this->_usdkService->search($params, $requestOptions);
     }
 
-    /**
-     * @api
-     *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function searchRaw(
-        array $params,
-        ?RequestOptions $requestOptions = null
-    ): mixed {
-        return $this->_usdkService->searchRaw($params, $requestOptions);
-    }
-
-    /** @return array<string, string> */
+    /** @return array<string,string> */
     protected function authHeaders(): array
     {
         return $this->apiKey ? ['X-API-Key' => $this->apiKey] : [];
