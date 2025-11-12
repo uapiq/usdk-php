@@ -33,7 +33,7 @@ final class UsdkServiceTest extends TestCase
             $this->markTestSkipped('Prism tests are disabled');
         }
 
-        $result = $this->client->extract('url');
+        $result = $this->client->extract(['url' => 'url']);
 
         $this->assertTrue(true); // @phpstan-ignore method.alreadyNarrowedType
     }
@@ -45,7 +45,7 @@ final class UsdkServiceTest extends TestCase
             $this->markTestSkipped('Prism tests are disabled');
         }
 
-        $result = $this->client->extract('url');
+        $result = $this->client->extract(['url' => 'url']);
 
         $this->assertTrue(true); // @phpstan-ignore method.alreadyNarrowedType
     }
@@ -57,7 +57,7 @@ final class UsdkServiceTest extends TestCase
             $this->markTestSkipped('Prism tests are disabled');
         }
 
-        $result = $this->client->search('query');
+        $result = $this->client->search(['query' => 'query']);
 
         $this->assertTrue(true); // @phpstan-ignore method.alreadyNarrowedType
     }
@@ -69,7 +69,7 @@ final class UsdkServiceTest extends TestCase
             $this->markTestSkipped('Prism tests are disabled');
         }
 
-        $result = $this->client->search('query');
+        $result = $this->client->search(['query' => 'query']);
 
         $this->assertTrue(true); // @phpstan-ignore method.alreadyNarrowedType
     }
