@@ -12,7 +12,7 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Search Get.
  *
- * @see Usdk->search
+ * @see Usdk\Services\UsdkService::search()
  *
  * @phpstan-type UsdkServiceSearchParamsShape = array{query: string}
  */

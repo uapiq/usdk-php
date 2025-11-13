@@ -12,7 +12,7 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Extract Get.
  *
- * @see Usdk->extract
+ * @see Usdk\Services\UsdkService::extract()
  *
  * @phpstan-type UsdkServiceExtractParamsShape = array{url: string}
  */
