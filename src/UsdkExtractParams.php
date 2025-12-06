@@ -53,7 +53,7 @@ final class UsdkExtractParams implements BaseModel
     {
         $obj = new self;
 
-        $obj->url = $url;
+        $obj['url'] = $url;
 
         return $obj;
     }
@@ -61,7 +61,7 @@ final class UsdkExtractParams implements BaseModel
     public function withURL(string $url): self
     {
         $obj = clone $this;
-        $obj->url = $url;
+        $obj['url'] = $url;
 
         return $obj;
     }

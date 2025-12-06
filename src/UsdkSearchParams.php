@@ -53,7 +53,7 @@ final class UsdkSearchParams implements BaseModel
     {
         $obj = new self;
 
-        $obj->query = $query;
+        $obj['query'] = $query;
 
         return $obj;
     }
@@ -61,7 +61,7 @@ final class UsdkSearchParams implements BaseModel
     public function withQuery(string $query): self
     {
         $obj = clone $this;
-        $obj->query = $query;
+        $obj['query'] = $query;
 
         return $obj;
     }
