@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Usdk;
 
-use Usdk\Core\Attributes\Api;
+use Usdk\Core\Attributes\Required;
 use Usdk\Core\Concerns\SdkModel;
 use Usdk\Core\Concerns\SdkParams;
 use Usdk\Core\Contracts\BaseModel;
@@ -22,7 +22,7 @@ final class UsdkExtractParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
-    #[Api]
+    #[Required]
     public string $url;
 
     /**
