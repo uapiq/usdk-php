@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Usdk\Services;
 
 use Usdk\Client;
+use Usdk\Core\Contracts\BaseResponse;
 use Usdk\Core\Exceptions\APIException;
 use Usdk\RequestOptions;
 use Usdk\ServiceContracts\UsdkServiceContract;
@@ -36,14 +37,16 @@ final class UsdkService implements UsdkServiceContract
             $requestOptions,
         );
 
-        // @phpstan-ignore-next-line return.type
-        return $this->client->request(
+        /** @var BaseResponse<mixed> */
+        $response = $this->client->request(
             method: 'get',
             path: 'v1/extract',
             query: $parsed,
             options: $options,
             convert: 'mixed',
         );
+
+        return $response->parse();
     }
 
     /**
@@ -64,13 +67,15 @@ final class UsdkService implements UsdkServiceContract
             $requestOptions,
         );
 
-        // @phpstan-ignore-next-line return.type
-        return $this->client->request(
+        /** @var BaseResponse<mixed> */
+        $response = $this->client->request(
             method: 'get',
             path: 'v1/search',
             query: $parsed,
             options: $options,
             convert: 'mixed',
         );
+
+        return $response->parse();
     }
 }
