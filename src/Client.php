@@ -8,6 +8,7 @@ use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 use Usdk\Core\BaseClient;
 use Usdk\Core\Exceptions\APIException;
+use Usdk\Services\UsdkRawService;
 use Usdk\Services\UsdkService;
 
 class Client extends BaseClient
@@ -17,7 +18,12 @@ class Client extends BaseClient
     /**
      * @api
      */
-    private UsdkService $_usdkService;
+    public UsdkRawService $raw;
+
+    /**
+     * @api
+     */
+    private UsdkService $usdkService;
 
     public function __construct(
         public ?int $cacheTtl = null,
@@ -54,7 +60,8 @@ class Client extends BaseClient
             options: $options,
         );
 
-        $this->_usdkService = new UsdkService($this);
+        $this->raw = new UsdkRawService($this);
+        $this->usdkService = new UsdkService($this);
     }
 
     /**
@@ -62,15 +69,13 @@ class Client extends BaseClient
      *
      * Extract Get
      *
-     * @param array{url: string}|UsdkExtractParams $params
-     *
      * @throws APIException
      */
     public function extract(
-        array|UsdkExtractParams $params,
+        string $url,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->_usdkService->extract($params, $requestOptions);
+        return $this->usdkService->extract(STAINLESS_FIXME_params, $requestOptions);
     }
 
     /**
@@ -78,15 +83,13 @@ class Client extends BaseClient
      *
      * Search Get
      *
-     * @param array{query: string}|UsdkSearchParams $params
-     *
      * @throws APIException
      */
     public function search(
-        array|UsdkSearchParams $params,
+        string $query,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->_usdkService->search($params, $requestOptions);
+        return $this->usdkService->search(STAINLESS_FIXME_params, $requestOptions);
     }
 
     /** @return array<string,string> */
