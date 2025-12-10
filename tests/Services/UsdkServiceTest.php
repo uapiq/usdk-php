@@ -36,7 +36,7 @@ final class UsdkServiceTest extends TestCase
         $result = $this->client->extract(url: 'url');
 
         // @phpstan-ignore-next-line method.alreadyNarrowedType
-        $this->assertTrue($result);
+        $this->assertIsNotResource($result);
     }
 
     #[Test]
@@ -49,7 +49,7 @@ final class UsdkServiceTest extends TestCase
         $result = $this->client->extract(url: 'url');
 
         // @phpstan-ignore-next-line method.alreadyNarrowedType
-        $this->assertTrue($result);
+        $this->assertIsNotResource($result);
     }
 
     #[Test]
@@ -62,7 +62,7 @@ final class UsdkServiceTest extends TestCase
         $result = $this->client->search(query: 'query');
 
         // @phpstan-ignore-next-line method.alreadyNarrowedType
-        $this->assertTrue($result);
+        $this->assertIsNotResource($result);
     }
 
     #[Test]
@@ -75,6 +75,6 @@ final class UsdkServiceTest extends TestCase
         $result = $this->client->search(query: 'query');
 
         // @phpstan-ignore-next-line method.alreadyNarrowedType
-        $this->assertTrue($result);
+        $this->assertIsNotResource($result);
     }
 }
