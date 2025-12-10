@@ -51,18 +51,18 @@ final class UsdkSearchParams implements BaseModel
      */
     public static function with(string $query): self
     {
-        $obj = new self;
+        $self = new self;
 
-        $obj['query'] = $query;
+        $self['query'] = $query;
 
-        return $obj;
+        return $self;
     }
 
     public function withQuery(string $query): self
     {
-        $obj = clone $this;
-        $obj['query'] = $query;
+        $self = clone $this;
+        $self['query'] = $query;
 
-        return $obj;
+        return $self;
     }
 }
