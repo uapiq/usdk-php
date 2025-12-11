@@ -6,6 +6,7 @@ namespace Usdk\Services;
 
 use Usdk\Client;
 use Usdk\Core\Exceptions\APIException;
+use Usdk\Core\Util;
 use Usdk\RequestOptions;
 use Usdk\ServiceContracts\UsdkServiceContract;
 
@@ -35,7 +36,7 @@ final class UsdkService implements UsdkServiceContract
         string $url,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        $params = ['url' => $url];
+        $params = Util::removeNulls(['url' => $url]);
 
         // @phpstan-ignore-next-line argument.type
         $response = $this->raw->extract(params: $params, requestOptions: $requestOptions);
@@ -54,7 +55,7 @@ final class UsdkService implements UsdkServiceContract
         string $query,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        $params = ['query' => $query];
+        $params = Util::removeNulls(['query' => $query]);
 
         // @phpstan-ignore-next-line argument.type
         $response = $this->raw->search(params: $params, requestOptions: $requestOptions);
