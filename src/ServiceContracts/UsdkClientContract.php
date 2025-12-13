@@ -7,7 +7,7 @@ namespace Usdk\ServiceContracts;
 use Usdk\Core\Exceptions\APIException;
 use Usdk\RequestOptions;
 
-interface UsdkServiceContract
+interface UsdkClientContract
 {
     /**
      * @api

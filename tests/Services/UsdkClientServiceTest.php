@@ -12,7 +12,7 @@ use Usdk\Client;
  * @internal
  */
 #[CoversNothing]
-final class UsdkServiceTest extends TestCase
+final class UsdkClientServiceTest extends TestCase
 {
     protected Client $client;
 

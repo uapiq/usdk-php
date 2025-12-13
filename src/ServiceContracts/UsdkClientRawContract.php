@@ -10,7 +10,7 @@ use Usdk\RequestOptions;
 use Usdk\UsdkExtractParams;
 use Usdk\UsdkSearchParams;
 
-interface UsdkRawServiceContract
+interface UsdkClientRawContract
 {
     /**
      * @api

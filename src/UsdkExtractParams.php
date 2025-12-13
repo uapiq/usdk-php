@@ -12,13 +12,13 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Extract Get.
  *
- * @see Usdk\Services\UsdkService::extract()
+ * @see Usdk\Services\UsdkClientService::extract()
  *
- * @phpstan-type UsdkServiceExtractParamsShape = array{url: string}
+ * @phpstan-type UsdkClientServiceExtractParamsShape = array{url: string}
  */
 final class UsdkExtractParams implements BaseModel
 {
-    /** @use SdkModel<UsdkServiceExtractParamsShape> */
+    /** @use SdkModel<UsdkClientServiceExtractParamsShape> */
     use SdkModel;
     use SdkParams;
 
