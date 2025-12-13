@@ -8,21 +8,21 @@ use Usdk\Client;
 use Usdk\Core\Exceptions\APIException;
 use Usdk\Core\Util;
 use Usdk\RequestOptions;
-use Usdk\ServiceContracts\UsdkServiceContract;
+use Usdk\ServiceContracts\UsdkClientContract;
 
-final class UsdkService implements UsdkServiceContract
+final class UsdkClientService implements UsdkClientContract
 {
     /**
      * @api
      */
-    public UsdkRawService $raw;
+    public UsdkClientRawService $raw;
 
     /**
      * @internal
      */
     public function __construct(private Client $client)
     {
-        $this->raw = new UsdkRawService($client);
+        $this->raw = new UsdkClientRawService($client);
     }
 
     /**

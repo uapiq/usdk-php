@@ -8,11 +8,11 @@ use Usdk\Client;
 use Usdk\Core\Contracts\BaseResponse;
 use Usdk\Core\Exceptions\APIException;
 use Usdk\RequestOptions;
-use Usdk\ServiceContracts\UsdkRawServiceContract;
+use Usdk\ServiceContracts\UsdkClientRawContract;
 use Usdk\UsdkExtractParams;
 use Usdk\UsdkSearchParams;
 
-final class UsdkRawService implements UsdkRawServiceContract
+final class UsdkClientRawService implements UsdkClientRawContract
 {
     // @phpstan-ignore-next-line
     /**

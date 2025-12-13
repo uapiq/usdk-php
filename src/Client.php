@@ -9,8 +9,8 @@ use Http\Discovery\Psr18ClientDiscovery;
 use Usdk\Core\BaseClient;
 use Usdk\Core\Exceptions\APIException;
 use Usdk\Core\Util;
-use Usdk\Services\UsdkRawService;
-use Usdk\Services\UsdkService;
+use Usdk\Services\UsdkClientRawService;
+use Usdk\Services\UsdkClientService;
 
 class Client extends BaseClient
 {
@@ -19,12 +19,12 @@ class Client extends BaseClient
     /**
      * @api
      */
-    public UsdkRawService $raw;
+    public UsdkClientRawService $raw;
 
     /**
      * @api
      */
-    private UsdkService $usdkService;
+    private UsdkClientService $usdkClientService;
 
     public function __construct(
         public ?int $cacheTtl = null,
@@ -59,8 +59,8 @@ class Client extends BaseClient
             options: $options
         );
 
-        $this->raw = new UsdkRawService($this);
-        $this->usdkService = new UsdkService($this);
+        $this->raw = new UsdkClientRawService($this);
+        $this->usdkClientService = new UsdkClientService($this);
     }
 
     /**
@@ -74,7 +74,10 @@ class Client extends BaseClient
         string $url,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->usdkService->extract(STAINLESS_FIXME_params, $requestOptions);
+        return $this->usdkClientService->extract(
+            STAINLESS_FIXME_params,
+            $requestOptions
+        );
     }
 
     /**
@@ -88,7 +91,10 @@ class Client extends BaseClient
         string $query,
         ?RequestOptions $requestOptions = null
     ): mixed {
-        return $this->usdkService->search(STAINLESS_FIXME_params, $requestOptions);
+        return $this->usdkClientService->search(
+            STAINLESS_FIXME_params,
+            $requestOptions
+        );
     }
 
     /** @return array<string,string> */

@@ -12,13 +12,13 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Search Get.
  *
- * @see Usdk\Services\UsdkService::search()
+ * @see Usdk\Services\UsdkClientService::search()
  *
- * @phpstan-type UsdkServiceSearchParamsShape = array{query: string}
+ * @phpstan-type UsdkClientServiceSearchParamsShape = array{query: string}
  */
 final class UsdkSearchParams implements BaseModel
 {
-    /** @use SdkModel<UsdkServiceSearchParamsShape> */
+    /** @use SdkModel<UsdkClientServiceSearchParamsShape> */
     use SdkModel;
     use SdkParams;
 
