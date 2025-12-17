@@ -15,7 +15,7 @@ interface UsdkClientRawContract
     /**
      * @api
      *
-     * @param array<mixed>|UsdkExtractParams $params
+     * @param array<string,mixed>|UsdkExtractParams $params
      *
      * @return BaseResponse<mixed>
      *
@@ -29,7 +29,7 @@ interface UsdkClientRawContract
     /**
      * @api
      *
-     * @param array<mixed>|UsdkSearchParams $params
+     * @param array<string,mixed>|UsdkSearchParams $params
      *
      * @return BaseResponse<mixed>
      *
