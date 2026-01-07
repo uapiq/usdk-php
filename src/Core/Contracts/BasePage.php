@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Usdk\Core\Contracts;
 
 /**
- * @internal
+ * @phpstan-import-type NormalizedRequest from \Usdk\Core\BaseClient
  *
- * @phpstan-import-type normalized_request from \Usdk\Core\BaseClient
+ * @internal
  *
  * @template Item
  *
