@@ -10,6 +10,9 @@ use Usdk\Core\Util;
 use Usdk\RequestOptions;
 use Usdk\ServiceContracts\UsdkClientContract;
 
+/**
+ * @phpstan-import-type RequestOpts from \Usdk\RequestOptions
+ */
 final class UsdkClientService implements UsdkClientContract
 {
     /**
@@ -30,11 +33,13 @@ final class UsdkClientService implements UsdkClientContract
      *
      * Extract Get
      *
+     * @param RequestOpts|null $requestOptions
+     *
      * @throws APIException
      */
     public function extract(
         string $url,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
         $params = Util::removeNulls(['url' => $url]);
 
@@ -49,11 +54,13 @@ final class UsdkClientService implements UsdkClientContract
      *
      * Search Get
      *
+     * @param RequestOpts|null $requestOptions
+     *
      * @throws APIException
      */
     public function search(
         string $query,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
         $params = Util::removeNulls(['query' => $query]);
 

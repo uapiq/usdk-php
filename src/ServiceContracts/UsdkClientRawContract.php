@@ -10,12 +10,16 @@ use Usdk\RequestOptions;
 use Usdk\UsdkExtractParams;
 use Usdk\UsdkSearchParams;
 
+/**
+ * @phpstan-import-type RequestOpts from \Usdk\RequestOptions
+ */
 interface UsdkClientRawContract
 {
     /**
      * @api
      *
      * @param array<string,mixed>|UsdkExtractParams $params
+     * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<mixed>
      *
@@ -23,13 +27,14 @@ interface UsdkClientRawContract
      */
     public function extract(
         array|UsdkExtractParams $params,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null,
     ): BaseResponse;
 
     /**
      * @api
      *
      * @param array<string,mixed>|UsdkSearchParams $params
+     * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<mixed>
      *
@@ -37,6 +42,6 @@ interface UsdkClientRawContract
      */
     public function search(
         array|UsdkSearchParams $params,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null,
     ): BaseResponse;
 }

@@ -30,20 +30,27 @@ class Client extends BaseClient
      */
     private UsdkClientService $usdkClientService;
 
+    /**
+     * @param RequestOpts|null $requestOptions
+     */
     public function __construct(
         public ?int $cacheTtl = null,
         ?string $apiKey = null,
         ?string $baseUrl = null,
+        RequestOptions|array|null $requestOptions = null,
     ) {
         $this->apiKey = (string) ($apiKey ?? getenv('UAPI_API_KEY'));
 
         $baseUrl ??= getenv('UAPI_BASE_URL') ?: 'https://api.uapi.nl';
 
-        $options = RequestOptions::with(
-            uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-            streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-            requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-            transporter: Psr18ClientDiscovery::find(),
+        $options = RequestOptions::parse(
+            RequestOptions::with(
+                uriFactory: Psr17FactoryDiscovery::findUriFactory(),
+                streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
+                requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
+                transporter: Psr18ClientDiscovery::find(),
+            ),
+            $requestOptions,
         );
 
         parent::__construct(
@@ -72,11 +79,13 @@ class Client extends BaseClient
      *
      * Extract Get
      *
+     * @param RequestOpts|null $requestOptions
+     *
      * @throws APIException
      */
     public function extract(
         string $url,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
         return $this->usdkClientService->extract(
             STAINLESS_FIXME_params,
@@ -89,11 +98,13 @@ class Client extends BaseClient
      *
      * Search Get
      *
+     * @param RequestOpts|null $requestOptions
+     *
      * @throws APIException
      */
     public function search(
         string $query,
-        ?RequestOptions $requestOptions = null
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
         return $this->usdkClientService->search(
             STAINLESS_FIXME_params,
