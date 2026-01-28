@@ -87,10 +87,7 @@ class Client extends BaseClient
         string $url,
         RequestOptions|array|null $requestOptions = null
     ): mixed {
-        return $this->usdkClientService->extract(
-            STAINLESS_FIXME_params,
-            $requestOptions
-        );
+        return $this->usdkClientService->extract($url, $requestOptions);
     }
 
     /**
@@ -106,10 +103,7 @@ class Client extends BaseClient
         string $query,
         RequestOptions|array|null $requestOptions = null
     ): mixed {
-        return $this->usdkClientService->search(
-            STAINLESS_FIXME_params,
-            $requestOptions
-        );
+        return $this->usdkClientService->search($query, $requestOptions);
     }
 
     /** @return array<string,string> */
