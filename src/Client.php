@@ -39,9 +39,9 @@ class Client extends BaseClient
         ?string $baseUrl = null,
         RequestOptions|array|null $requestOptions = null,
     ) {
-        $this->apiKey = (string) ($apiKey ?? getenv('UAPI_API_KEY'));
+        $this->apiKey = (string) ($apiKey ?? Util::getenv('UAPI_API_KEY'));
 
-        $baseUrl ??= getenv('UAPI_BASE_URL') ?: 'https://api.uapi.nl';
+        $baseUrl ??= Util::getenv('UAPI_BASE_URL') ?: 'https://api.uapi.nl';
 
         $options = RequestOptions::parse(
             RequestOptions::with(
