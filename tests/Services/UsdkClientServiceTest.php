@@ -31,7 +31,7 @@ final class UsdkClientServiceTest extends TestCase
     public function testExtract(): void
     {
         if (UnsupportedMockTests::$skip) {
-            $this->markTestSkipped('Prism tests are disabled');
+            $this->markTestSkipped('Mock server tests are disabled');
         }
 
         $result = $this->client->extract(url: 'url');
@@ -44,7 +44,7 @@ final class UsdkClientServiceTest extends TestCase
     public function testExtractWithOptionalParams(): void
     {
         if (UnsupportedMockTests::$skip) {
-            $this->markTestSkipped('Prism tests are disabled');
+            $this->markTestSkipped('Mock server tests are disabled');
         }
 
         $result = $this->client->extract(url: 'url');
@@ -57,7 +57,7 @@ final class UsdkClientServiceTest extends TestCase
     public function testSearch(): void
     {
         if (UnsupportedMockTests::$skip) {
-            $this->markTestSkipped('Prism tests are disabled');
+            $this->markTestSkipped('Mock server tests are disabled');
         }
 
         $result = $this->client->search(query: 'query');
@@ -70,7 +70,7 @@ final class UsdkClientServiceTest extends TestCase
     public function testSearchWithOptionalParams(): void
     {
         if (UnsupportedMockTests::$skip) {
-            $this->markTestSkipped('Prism tests are disabled');
+            $this->markTestSkipped('Mock server tests are disabled');
         }
 
         $result = $this->client->search(query: 'query');
