@@ -8,6 +8,7 @@ use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 use Usdk\Core\BaseClient;
 use Usdk\Core\Exceptions\APIException;
+use Usdk\Core\Implementation\StreamingHttpClient;
 use Usdk\Core\Util;
 use Usdk\Services\UsdkClientRawService;
 use Usdk\Services\UsdkClientService;
@@ -52,6 +53,11 @@ class Client extends BaseClient
             ),
             $requestOptions,
         );
+
+        if (is_null($options->streamingTransporter)) {
+            assert(!is_null($options->transporter));
+            $options->streamingTransporter = new StreamingHttpClient($options->transporter);
+        }
 
         /** @var array<string, string|null> $headers */
         $headers = [
