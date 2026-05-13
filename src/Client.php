@@ -8,8 +8,15 @@ use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 use Usdk\Core\BaseClient;
 use Usdk\Core\Exceptions\APIException;
-use Usdk\Services\UsdkService;
+use Usdk\Core\Implementation\StreamingHttpClient;
+use Usdk\Core\Util;
+use Usdk\Services\UsdkClientRawService;
+use Usdk\Services\UsdkClientService;
 
+/**
+ * @phpstan-import-type NormalizedRequest from \Usdk\Core\BaseClient
+ * @phpstan-import-type RequestOpts from \Usdk\RequestOptions
+ */
 class Client extends BaseClient
 {
     public string $apiKey;
@@ -17,44 +24,73 @@ class Client extends BaseClient
     /**
      * @api
      */
-    private UsdkService $_usdkService;
+    public UsdkClientRawService $raw;
 
+    /**
+     * @api
+     */
+    private UsdkClientService $usdkClientService;
+
+    /**
+     * @param RequestOpts|null $requestOptions
+     */
     public function __construct(
         public ?int $cacheTtl = null,
         ?string $apiKey = null,
         ?string $baseUrl = null,
+        RequestOptions|array|null $requestOptions = null,
     ) {
-        $this->apiKey = (string) ($apiKey ?? getenv('UAPI_API_KEY'));
+        $this->apiKey = (string) ($apiKey ?? Util::getenv('UAPI_API_KEY'));
 
-        $baseUrl ??= getenv('UAPI_BASE_URL') ?: 'https://api.uapi.nl';
+        $baseUrl ??= Util::getenv('UAPI_BASE_URL') ?: 'https://api.uapi.nl';
 
-        $options = RequestOptions::with(
-            uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-            streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-            requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-            transporter: Psr18ClientDiscovery::find(),
+        $options = RequestOptions::parse(
+            RequestOptions::with(
+                uriFactory: Psr17FactoryDiscovery::findUriFactory(),
+                streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
+                requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
+                transporter: Psr18ClientDiscovery::find(),
+            ),
+            $requestOptions,
         );
+
+        if (is_null($options->streamingTransporter)) {
+            assert(!is_null($options->transporter));
+            $options->streamingTransporter = new StreamingHttpClient($options->transporter);
+        }
+
+        /** @var array<string, string|null> $headers */
+        $headers = [
+            'x-cache-ttl' => $this->cacheTtl,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'User-Agent' => sprintf('uapi/PHP %s', VERSION),
+            'X-Stainless-Lang' => 'php',
+            'X-Stainless-Package-Version' => '0.0.1',
+            'X-Stainless-Arch' => Util::machtype(),
+            'X-Stainless-OS' => Util::ostype(),
+            'X-Stainless-Runtime' => php_sapi_name(),
+            'X-Stainless-Runtime-Version' => phpversion(),
+        ];
+
+        $customHeadersEnv = Util::getenv('UAPI_CUSTOM_HEADERS');
+        if (null !== $customHeadersEnv) {
+            foreach (explode("\n", $customHeadersEnv) as $line) {
+                $colon = strpos($line, ':');
+                if (false !== $colon) {
+                    $headers[trim(substr($line, 0, $colon))] = trim(substr($line, $colon + 1));
+                }
+            }
+        }
 
         parent::__construct(
-            // x-release-please-start-version
-            headers: [
-                'x-cache-ttl' => $this->cacheTtl,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-                'User-Agent' => sprintf('uapi/PHP %s', '0.0.1'),
-                'X-Stainless-Lang' => 'php',
-                'X-Stainless-Package-Version' => '0.0.1',
-                'X-Stainless-OS' => $this->getNormalizedOS(),
-                'X-Stainless-Arch' => $this->getNormalizedArchitecture(),
-                'X-Stainless-Runtime' => 'php',
-                'X-Stainless-Runtime-Version' => phpversion(),
-            ],
-            // x-release-please-end
+            headers: $headers,
             baseUrl: $baseUrl,
-            options: $options,
+            options: $options
         );
 
-        $this->_usdkService = new UsdkService($this);
+        $this->raw = new UsdkClientRawService($this);
+        $this->usdkClientService = new UsdkClientService($this);
     }
 
     /**
@@ -62,27 +98,15 @@ class Client extends BaseClient
      *
      * Extract Get
      *
-     * @param string $url
+     * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
      */
-    public function extract($url, ?RequestOptions $requestOptions = null): mixed
-    {
-        return $this->_usdkService->extract($url, $requestOptions);
-    }
-
-    /**
-     * @api
-     *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function extractRaw(
-        array $params,
-        ?RequestOptions $requestOptions = null
+    public function extract(
+        string $url,
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
-        return $this->_usdkService->extractRaw($params, $requestOptions);
+        return $this->usdkClientService->extract($url, $requestOptions);
     }
 
     /**
@@ -90,34 +114,48 @@ class Client extends BaseClient
      *
      * Search Get
      *
-     * @param string $query
+     * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
      */
     public function search(
-        $query,
-        ?RequestOptions $requestOptions = null
+        string $query,
+        RequestOptions|array|null $requestOptions = null
     ): mixed {
-        return $this->_usdkService->search($query, $requestOptions);
+        return $this->usdkClientService->search($query, $requestOptions);
     }
 
-    /**
-     * @api
-     *
-     * @param array<string, mixed> $params
-     *
-     * @throws APIException
-     */
-    public function searchRaw(
-        array $params,
-        ?RequestOptions $requestOptions = null
-    ): mixed {
-        return $this->_usdkService->searchRaw($params, $requestOptions);
-    }
-
-    /** @return array<string, string> */
+    /** @return array<string,string> */
     protected function authHeaders(): array
     {
         return $this->apiKey ? ['X-API-Key' => $this->apiKey] : [];
+    }
+
+    /**
+     * @internal
+     *
+     * @param string|list<string> $path
+     * @param array<string,mixed> $query
+     * @param array<string,string|int|list<string|int>|null> $headers
+     * @param RequestOpts|null $opts
+     *
+     * @return array{NormalizedRequest, RequestOptions}
+     */
+    protected function buildRequest(
+        string $method,
+        string|array $path,
+        array $query,
+        array $headers,
+        mixed $body,
+        RequestOptions|array|null $opts,
+    ): array {
+        return parent::buildRequest(
+            method: $method,
+            path: $path,
+            query: $query,
+            headers: [...$this->authHeaders(), ...$headers],
+            body: $body,
+            opts: $opts,
+        );
     }
 }

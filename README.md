@@ -1,12 +1,5 @@
 # uAPI PHP API library
 
-> [!NOTE]
-> The uAPI PHP API Library is currently in **beta** and we're excited for you to experiment with it!
->
-> This library has not yet been exhaustively tested in production environments and may be missing some features you'd expect in a stable release. As we continue development, there may be breaking changes that require updates to your code.
->
-> **We'd love your feedback!** Please share any suggestions, bug reports, feature requests, or general thoughts by [filing an issue](https://www.github.com/stainless-sdks/usdk-php/issues/new).
-
 The uAPI PHP library provides convenient access to the uAPI REST API from any PHP 8.1.0+ application.
 
 It is generated with [Stainless](https://www.stainless.com/).
@@ -19,12 +12,14 @@ The REST API documentation can be found on [docs.uapi.nl](https://docs.uapi.nl/)
 
 To use this package, install via Composer by adding the following to your application's `composer.json`:
 
+<!-- x-release-please-start-version -->
+
 ```json
 {
   "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:stainless-sdks/usdk-php.git"
+      "url": "git@github.com:uapiq/usdk-php.git"
     }
   ],
   "require": {
@@ -32,6 +27,8 @@ To use this package, install via Composer by adding the following to your applic
   }
 }
 ```
+
+<!-- x-release-please-end -->
 
 ## Usage
 
@@ -43,9 +40,9 @@ Parameters with a default value must be set by name.
 
 use Usdk\Client;
 
-$client = new Client(apiKey: getenv("UAPI_API_KEY") ?: "My API Key");
+$client = new Client(apiKey: getenv('UAPI_API_KEY') ?: 'My API Key');
 
-$response = $client->search("When is the next solar eclipse?");
+$response = $client->search(query: 'When is the next solar eclipse?');
 
 var_dump($response);
 ```
@@ -65,15 +62,17 @@ When the library is unable to connect to the API, or if the API returns a non-su
 <?php
 
 use Usdk\Core\Exceptions\APIConnectionException;
+use Usdk\Core\Exceptions\RateLimitException;
+use Usdk\Core\Exceptions\APIStatusException;
 
 try {
-  $response = $client->extract("https://finance.yahoo.com/quote/NVDA/");
+  $response = $client->extract(url: 'https://finance.yahoo.com/quote/NVDA/');
 } catch (APIConnectionException $e) {
   echo "The server could not be reached", PHP_EOL;
   var_dump($e->getPrevious());
-} catch (RateLimitError $_) {
+} catch (RateLimitException $e) {
   echo "A 429 status code was received; we should back off a bit.", PHP_EOL;
-} catch (APIStatusError $e) {
+} catch (APIStatusException $e) {
   echo "Another non-200-range status code was received", PHP_EOL;
   echo $e->getMessage();
 }
@@ -107,15 +106,14 @@ You can use the `maxRetries` option to configure or disable this:
 <?php
 
 use Usdk\Client;
-use Usdk\RequestOptions;
 
 // Configure the default for all requests:
-$client = new Client(maxRetries: 0);
+$client = new Client(requestOptions: ['maxRetries' => 0]);
 
 // Or, configure per-request:
 $result = $client->extract(
-  "https://finance.yahoo.com/quote/NVDA/",
-  requestOptions: RequestOptions::with(maxRetries: 5),
+  url: 'https://finance.yahoo.com/quote/NVDA/',
+  requestOptions: ['maxRetries' => 5],
 );
 ```
 
@@ -132,18 +130,14 @@ Note: the `extra*` parameters of the same name overrides the documented paramete
 ```php
 <?php
 
-use Usdk\RequestOptions;
-
 $response = $client->extract(
-  "https://finance.yahoo.com/quote/NVDA/",
-  requestOptions: RequestOptions::with(
-    extraQueryParams: ["my_query_parameter" => "value"],
-    extraBodyParams: ["my_body_parameter" => "value"],
-    extraHeaders: ["my-header" => "value"],
-  ),
+  url: 'https://finance.yahoo.com/quote/NVDA/',
+  requestOptions: [
+    'extraQueryParams' => ['my_query_parameter' => 'value'],
+    'extraBodyParams' => ['my_body_parameter' => 'value'],
+    'extraHeaders' => ['my-header' => 'value'],
+  ],
 );
-
-var_dump($response["my_undocumented_property"]);
 ```
 
 #### Undocumented request params
@@ -178,4 +172,4 @@ PHP 8.1.0 or higher.
 
 ## Contributing
 
-See [the contributing documentation](https://github.com/stainless-sdks/usdk-php/tree/main/CONTRIBUTING.md).
+See [the contributing documentation](https://github.com/uapiq/usdk-php/tree/main/CONTRIBUTING.md).

@@ -5,27 +5,27 @@ declare(strict_types=1);
 namespace Usdk\Core;
 
 use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 use Usdk\Core\Contracts\BasePage;
+use Usdk\Core\Contracts\BaseResponse;
 use Usdk\Core\Contracts\BaseStream;
 use Usdk\Core\Conversion\Contracts\Converter;
 use Usdk\Core\Conversion\Contracts\ConverterSource;
 use Usdk\Core\Exceptions\APIConnectionException;
 use Usdk\Core\Exceptions\APIStatusException;
+use Usdk\Core\Implementation\RawResponse;
 use Usdk\RequestOptions;
 
 /**
- * @phpstan-type normalized_request = array{
+ * @phpstan-import-type RequestOpts from \Usdk\RequestOptions
+ *
+ * @phpstan-type NormalizedRequest = array{
  *   method: string,
  *   path: string,
- *   query: array<string, mixed>,
- *   headers: array<string, string|null|list<string>>,
+ *   query: array<string,mixed>,
+ *   headers: array<string,string|null|list<string>>,
  *   body: mixed,
  * }
  */
@@ -36,11 +36,12 @@ abstract class BaseClient
     /**
      * @internal
      *
-     * @param array<string, string|int|list<string|int>|null> $headers
+     * @param array<string,string|int|list<string|int>|null> $headers
      */
     public function __construct(
         protected array $headers,
         string $baseUrl,
+        protected ?string $idempotencyHeader = null,
         protected RequestOptions $options = new RequestOptions,
     ) {
         assert(!is_null($this->options->uriFactory));
@@ -49,11 +50,14 @@ abstract class BaseClient
 
     /**
      * @param string|list<mixed> $path
-     * @param array<string, mixed> $query
-     * @param array<string, mixed> $headers
-     * @param class-string<BasePage<mixed>> $page
-     * @param class-string<BaseStream<mixed>> $stream
-     * @param RequestOptions|array<string, mixed>|null $options
+     * @param array<string,mixed> $query
+     * @param array<string,mixed> $headers
+     * @param string|int|list<string|int>|null $unwrap
+     * @param class-string<BasePage<mixed>>|null $page
+     * @param class-string<BaseStream<mixed>>|null $stream
+     * @param RequestOptions|array<string,mixed>|null $options
+     *
+     * @return BaseResponse<mixed>
      */
     public function request(
         string $method,
@@ -61,121 +65,56 @@ abstract class BaseClient
         array $query = [],
         array $headers = [],
         mixed $body = null,
+        string|int|array|null $unwrap = null,
         string|Converter|ConverterSource|null $convert = null,
         ?string $page = null,
         ?string $stream = null,
         RequestOptions|array|null $options = [],
-    ): mixed {
-        // @phpstan-ignore-next-line
-        [$req, $opts] = $this->buildRequest(method: $method, path: $path, query: $query, headers: $headers, body: $body, opts: $options);
-        ['method' => $method, 'path' => $uri, 'headers' => $headers] = $req;
+    ): BaseResponse {
+        [$req, $opts] = $this->buildRequest(
+            method: $method,
+            // @phpstan-ignore argument.type
+            path: $path,
+            query: $query,
+            // @phpstan-ignore argument.type
+            headers: $headers,
+            body: $body,
+            // @phpstan-ignore argument.type
+            opts: $options,
+        );
+        ['method' => $method, 'path' => $uri, 'headers' => $headers, 'body' => $data] = $req;
         assert(!is_null($opts->requestFactory));
 
         $request = $opts->requestFactory->createRequest($method, uri: $uri);
         $request = Util::withSetHeaders($request, headers: $headers);
+        $request = $this->transformRequest($request);
 
-        // @phpstan-ignore-next-line
-        $rsp = $this->sendRequest($opts, req: $request, data: $body, redirectCount: 0, retryCount: 0);
+        // @phpstan-ignore-next-line argument.type
+        $rsp = $this->sendRequest($opts, req: $request, data: $data, redirectCount: 0, retryCount: 0);
 
-        if (!is_null($stream)) {
-            return new $stream(
-                convert: $convert,
-                request: $request,
-                response: $rsp
-            );
-        }
-
-        if (!is_null($page)) {
-            return new $page(
-                convert: $convert,
-                client: $this,
-                request: $req,
-                response: $rsp,
-                options: $opts,
-            );
-        }
-
-        if (!is_null($convert)) {
-            return Conversion::coerceResponse($convert, response: $rsp);
-        }
-
-        return Util::decodeContent($rsp);
+        // @phpstan-ignore-next-line argument.type
+        return new RawResponse(client: $this, request: $request, response: $rsp, options: $opts, requestInfo: $req, unwrap: $unwrap, stream: $stream, page: $page, convert: $convert ?? 'null');
     }
 
-    /** @return array<string, string> */
-    abstract protected function authHeaders(): array;
-
-    protected function getNormalizedOS(): string
+    /**
+     * @internal
+     */
+    protected function generateIdempotencyKey(): string
     {
-        $os = strtolower(PHP_OS_FAMILY);
+        $hex = bin2hex(random_bytes(32));
 
-        switch ($os) {
-            case 'windows':
-                return 'Windows';
-
-            case 'darwin':
-                return 'MacOS';
-
-            case 'linux':
-                return 'Linux';
-
-            case 'bsd':
-            case 'freebsd':
-            case 'openbsd':
-                return 'BSD';
-
-            case 'solaris':
-                return 'Solaris';
-
-            case 'unix':
-            case 'unknown':
-                return 'Unknown';
-
-            default:
-                return 'Other:'.$os;
-        }
-    }
-
-    protected function getNormalizedArchitecture(): string
-    {
-        $arch = php_uname('m');
-        if (false !== strpos($arch, 'x86_64') || false !== strpos($arch, 'amd64')) {
-            return 'x64';
-        }
-        if (false !== strpos($arch, 'i386') || false !== strpos($arch, 'i686')) {
-            return 'x32';
-        }
-        if (false !== strpos($arch, 'aarch64') || false !== strpos($arch, 'arm64')) {
-            return 'arm64';
-        }
-        if (false !== strpos($arch, 'arm')) {
-            return 'arm';
-        }
-
-        return 'unknown';
+        return "stainless-php-retry-{$hex}";
     }
 
     /**
      * @internal
      *
      * @param string|list<string> $path
-     * @param array<string, mixed> $query
-     * @param array<string, string|int|list<string|int>|null> $headers
-     * @param array{
-     *   timeout?: float|null,
-     *   maxRetries?: int|null,
-     *   initialRetryDelay?: float|null,
-     *   maxRetryDelay?: float|null,
-     *   extraHeaders?: array<string, string|int|list<string|int>|null>|null,
-     *   extraQueryParams?: array<string, mixed>|null,
-     *   extraBodyParams?: mixed,
-     *   transporter?: ClientInterface|null,
-     *   uriFactory?: UriFactoryInterface|null,
-     *   streamFactory?: StreamFactoryInterface|null,
-     *   requestFactory?: RequestFactoryInterface|null,
-     * }|null $opts
+     * @param array<string,mixed> $query
+     * @param array<string,string|int|list<string|int>|null> $headers
+     * @param RequestOpts|null $opts
      *
-     * @return array{normalized_request, RequestOptions}
+     * @return array{NormalizedRequest, RequestOptions}
      */
     protected function buildRequest(
         string $method,
@@ -189,22 +128,33 @@ abstract class BaseClient
 
         $parsedPath = Util::parsePath($path);
 
-        /** @var array<string, mixed> $mergedQuery */
+        /** @var array<string,mixed> $mergedQuery */
         $mergedQuery = array_merge_recursive(
             $query,
-            $options->extraQueryParams ?? [],
+            $options->extraQueryParams ?? []
         );
         $uri = Util::joinUri($this->baseUrl, path: $parsedPath, query: $mergedQuery)->__toString();
+        $idempotencyHeaders = $this->idempotencyHeader && !array_key_exists($this->idempotencyHeader, array: $headers)
+            ? [$this->idempotencyHeader => $this->generateIdempotencyKey()]
+            : [];
 
-        /** @var array<string, string|list<string>|null> $mergedHeaders */
-        $mergedHeaders = [...$this->headers,
-            ...$this->authHeaders(),
+        /** @var array<string,string|list<string>|null> $mergedHeaders */
+        $mergedHeaders = [
+            ...$this->headers,
             ...$headers,
-            ...($options->extraHeaders ?? []), ];
+            ...($options->extraHeaders ?? []),
+            ...$idempotencyHeaders,
+        ];
 
         $req = ['method' => strtoupper($method), 'path' => $uri, 'query' => $mergedQuery, 'headers' => $mergedHeaders, 'body' => $body];
 
         return [$req, $options];
+    }
+
+    protected function transformRequest(
+        RequestInterface $request
+    ): RequestInterface {
+        return $request;
     }
 
     /**
@@ -276,8 +226,7 @@ abstract class BaseClient
     /**
      * @internal
      *
-     * @param bool|int|float|string|resource|\Traversable<mixed>|array<string,
-     * mixed,>|null $data
+     * @param bool|int|float|string|resource|\Traversable<mixed,>|array<string,mixed>|null $data
      */
     protected function sendRequest(
         RequestOptions $opts,
@@ -288,15 +237,19 @@ abstract class BaseClient
     ): ResponseInterface {
         assert(null !== $opts->streamFactory && null !== $opts->transporter);
 
+        /** @var RequestInterface */
         $req = $req->withHeader('X-Stainless-Retry-Count', strval($retryCount));
-
         $req = Util::withSetBody($opts->streamFactory, req: $req, body: $data);
+
+        $transporter = Util::isStreamingRequest($req)
+            ? ($opts->streamingTransporter ?? $opts->transporter)
+            : $opts->transporter;
 
         $rsp = null;
         $err = null;
 
         try {
-            $rsp = $opts->transporter->sendRequest($req);
+            $rsp = $transporter->sendRequest($req);
         } catch (ClientExceptionInterface $e) {
             $err = $e;
         }
@@ -322,7 +275,7 @@ abstract class BaseClient
                 throw $exn;
             }
 
-            $seconds = $this->retryDelay($opts, retryCount: $redirectCount, rsp: $rsp);
+            $seconds = $this->retryDelay($opts, retryCount: $retryCount, rsp: $rsp);
             $floor = floor($seconds);
             time_nanosleep((int) $floor, nanoseconds: (int) ($seconds - $floor) * 10 ** 9);
 

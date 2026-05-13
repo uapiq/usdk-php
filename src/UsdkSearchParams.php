@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Usdk;
 
-use Usdk\Core\Attributes\Api;
+use Usdk\Core\Attributes\Required;
 use Usdk\Core\Concerns\SdkModel;
 use Usdk\Core\Concerns\SdkParams;
 use Usdk\Core\Contracts\BaseModel;
@@ -12,17 +12,17 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Search Get.
  *
- * @see Usdk->search
+ * @see Usdk\Services\UsdkClientService::search()
  *
- * @phpstan-type UsdkServiceSearchParamsShape = array{query: string}
+ * @phpstan-type UsdkSearchParamsShape = array{query: string}
  */
 final class UsdkSearchParams implements BaseModel
 {
-    /** @use SdkModel<UsdkServiceSearchParamsShape> */
+    /** @use SdkModel<UsdkSearchParamsShape> */
     use SdkModel;
     use SdkParams;
 
-    #[Api]
+    #[Required]
     public string $query;
 
     /**
@@ -51,18 +51,18 @@ final class UsdkSearchParams implements BaseModel
      */
     public static function with(string $query): self
     {
-        $obj = new self;
+        $self = new self;
 
-        $obj->query = $query;
+        $self['query'] = $query;
 
-        return $obj;
+        return $self;
     }
 
     public function withQuery(string $query): self
     {
-        $obj = clone $this;
-        $obj->query = $query;
+        $self = clone $this;
+        $self['query'] = $query;
 
-        return $obj;
+        return $self;
     }
 }

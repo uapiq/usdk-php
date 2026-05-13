@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Usdk;
 
-use Usdk\Core\Attributes\Api;
+use Usdk\Core\Attributes\Required;
 use Usdk\Core\Concerns\SdkModel;
 use Usdk\Core\Concerns\SdkParams;
 use Usdk\Core\Contracts\BaseModel;
@@ -12,17 +12,17 @@ use Usdk\Core\Contracts\BaseModel;
 /**
  * Extract Get.
  *
- * @see Usdk->extract
+ * @see Usdk\Services\UsdkClientService::extract()
  *
- * @phpstan-type UsdkServiceExtractParamsShape = array{url: string}
+ * @phpstan-type UsdkExtractParamsShape = array{url: string}
  */
 final class UsdkExtractParams implements BaseModel
 {
-    /** @use SdkModel<UsdkServiceExtractParamsShape> */
+    /** @use SdkModel<UsdkExtractParamsShape> */
     use SdkModel;
     use SdkParams;
 
-    #[Api]
+    #[Required]
     public string $url;
 
     /**
@@ -51,18 +51,18 @@ final class UsdkExtractParams implements BaseModel
      */
     public static function with(string $url): self
     {
-        $obj = new self;
+        $self = new self;
 
-        $obj->url = $url;
+        $self['url'] = $url;
 
-        return $obj;
+        return $self;
     }
 
     public function withURL(string $url): self
     {
-        $obj = clone $this;
-        $obj->url = $url;
+        $self = clone $this;
+        $self['url'] = $url;
 
-        return $obj;
+        return $self;
     }
 }
